@@ -74,7 +74,7 @@ dim(Coords)
 [1] 251   2
 ```
 
-# Preprocessing
+## Preprocessing
 Excluding low expressed genes
 ```
 Filtered_ExpMat <- SpFilter(rawcount)
@@ -91,13 +91,13 @@ dim(Filtered_ExpMat)
 [1] 11769   251
 ```
 
-# Computing p-values
+## Computing p-values
 The inputs are the coordinates and the expresson matrix, scBSP calculates the p-values
 ```
 P_values <- scBSP(Coords, Filtered_ExpMat)
 ```
 
-# Output the final results
+## Output the final results
 ```
 head(P_values)
   GeneNames     P_values
@@ -126,7 +126,37 @@ dim(results)
 [1] 1765    2
 ```
 
-# Example 2:
+
+
+
+# Example 2: HDST data of mouse hippocampus
+
+HDST provides a subcellular resolution spatial trianscriptomics data, which contains XX spots and XX genes with density XXX. The data can be downloaded at [here](https://github.com/juexinwang/Tutorial_DahShu2024/blob/master/data/CN24_D1_unmodgtf_filtered_red_ut_HDST_final_clean.rds)
+
+
+
+
+# Example 2: SlideSeq V2 data on Mouse Olfactory Bulb
+
+install.packages("remotes")
+remotes::install_github("satijalab/seurat-data")
+
+library(Seurat)
+library(SeuratData)
+library(SeuratObject)
+library(peakRAM)
+
+AvailableData()
+
+InstallData("ssHippo")
+slide.seq <- LoadData("ssHippo")
+data_extracted <- scBSP::LoadSpatial(slide.seq)
+ExpMatrix_Filtered <- scBSP::SpFilter(data_extracted$ExpMatrix, Threshold = 1)
+P_values <- scBSP::scBSP(data_extracted$Coords, ExpMatrix_Filtered)
+
+scBSP_mem <- peakRAM({
+  P_values <- scBSP::scBSP(data_extracted$Coords, ExpMatrix_Filtered)
+})
 
 # Cite
 Wang, J., Li, J., Kramer, S.T. et al. Dimension-agnostic and granularity-based spatially variable gene identification using BSP. Nat Commun 14, 7367 (2023). https://doi.org/10.1038/s41467-023-43256-5
