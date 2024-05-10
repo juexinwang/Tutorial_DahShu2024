@@ -1,6 +1,6 @@
 # Identifying Spatially Variable Genes using Big-Small Patch (BSP) algorithm and sparse matrix implementation as scBSP
 
-## Algorithm of BSP
+## BSP Algorithm
 
 Big-small patch (BSP) is a granularity-guided, data-driven, and parameter-free model for identifying spatial variable genes in 2D and 3D high-throughput spatial transcriptomics data.
 
@@ -26,7 +26,7 @@ install.packages("scBSP")
 ```
 
 # Example 1: Breast Cancer Data
-Load the scBSP package and Breast cancer data set, which can be downloaded here.
+Load the scBSP package and Breast cancer data set, which can be downloaded [here](https://github.com/juexinwang/Tutorial_DahShu2024/tree/master/data/Layer2_BC_Count.rds).
 
     library('scBSP')
     load("./Layer2_BC_Count.rds")
