@@ -1,10 +1,11 @@
+<!-- title: Identifying Spatially Variable Genes  -->
 # Identifying Spatially Variable Genes using Big-Small Patch (BSP) algorithm and sparse matrix implementation as scBSP
 
 ## BSP Algorithm
 
 Big-small patch (BSP) is a granularity-guided, data-driven, and parameter-free model for identifying spatial variable genes in 2D and 3D high-throughput spatial transcriptomics data.
 
-![BSP](flowchart.png)
+![BSP](https://github.com/juexinwang/BSP/blob/main/flowchart.png)
 
 Original implementation of BSP in python is available at https://github.com/juexinwang/BSP
 
