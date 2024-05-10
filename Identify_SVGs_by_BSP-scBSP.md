@@ -130,7 +130,7 @@ dim(results)
 ```
 
 
-# Example 2: HDST data of mouse hippocampus
+# Example 2: HDST data of mouse hippocampus 
 HDST provides a subcellular resolution spatial trianscriptomics data, which contains 181,367 spots and 13,243 genes with density XXX. The data can be downloaded at [here](https://github.com/juexinwang/Tutorial_DahShu2024/blob/master/data/CN24_D1_unmodgtf_filtered_red_ut_HDST_final_clean.rds)
 
     library('scBSP')
@@ -230,6 +230,25 @@ Calculating p-values
 1 P_values<-scBSP(Coords,Filtered_ExpMat)            2.877                0.1         505559907
 ```
 
+Calcuate the density of the data
+```
+Matrix::nnzero(sp_count)
+[1] 1217700
+
+dim(sp_count)
+[1]  19913 181367
+
+dimNum<-dim(sp_count)
+dimNum[1]*dimNum[2]
+[1] NA
+Warning message:
+In dimNum[1] * dimNum[2] : NAs produced by integer overflow
+
+> Matrix::nnzero(sp_count)/dimNum[1]/dimNum[2]
+[1] 0.0003371672
+```
+The density of the data is ~0.0003, which sparse matrix can accelerate a lot.
+
 ## Output the final results
 
 Final results are sorted and filtered if P_values<0.05 
@@ -302,8 +321,27 @@ Calculating p-values
 ```
 We can see it takes more time than HDST data for they have different density.
 
+Calcuate the density of the data
+```
+Matrix::nnzero(data_extracted$ExpMatrix)
+[1] 22361774
+
+dim(data_extracted$ExpMatrix)
+[1] 23264 53173
+
+dimNum<-dim(data_extracted$ExpMatrix)
+dimNum[1]*dimNum[2]
+[1] 1237016672
+
+Matrix::nnzero(data_extracted$ExpMatrix)/(dimNum[1]*dimNum[2])
+[1] 0.01807718
+```
+The density of the data is ~0.02, which sparse matrix cannot accelerate as much as HDST data with density ~0.0003.
+
+
 # Cite
-Wang, J., Li, J., Kramer, S.T. et al. Dimension-agnostic and granularity-based spatially variable gene identification using BSP. Nat Commun 14, 7367 (2023). https://doi.org/10.1038/s41467-023-43256-5
+1. Wang, J., Li, J., Kramer, S.T. et al. Dimension-agnostic and granularity-based spatially variable gene identification using BSP. Nat Commun 14, 7367 (2023). https://doi.org/10.1038/s41467-023-43256-5
+2. Li, J., Wang, Y., Raina, M.A. et al. scBSP: A fast and accurate tool for identifying spatially variable genes from spatial transcriptomic data. bioRxiv 2024.05.06.592851; doi: https://doi.org/10.1101/2024.05.06.592851
 
 # References:
 1. https://github.com/juexinwang/BSP/
