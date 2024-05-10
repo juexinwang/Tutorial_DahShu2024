@@ -26,7 +26,7 @@ install.packages("scBSP")
 ```
 
 # Example 1: Breast Cancer Data
-Load the scBSP package and Breast cancer data set, which can be downloaded [here](https://github.com/juexinwang/Tutorial_DahShu2024/tree/master/data/Layer2_BC_Count.rds).
+Load the scBSP package and Breast cancer data set, which can be downloaded [here](https://github.com/juexinwang/Tutorial_DahShu2024/blob/master/data/Layer2_BC_Count.rds).
 
     library('scBSP')
     load("./Layer2_BC_Count.rds")
