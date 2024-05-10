@@ -44,7 +44,9 @@ CPEB1   0   0   0   0   0
 LANCL2  0   0   0   0   0
 ```
 
-## extract the coordinates from the rawdata
+## Prepare the input: coordinates and gene expression
+
+Extract the coordinates from the rawdata
 ```
 info <- cbind.data.frame(x=as.numeric(sapply(strsplit(colnames(rawcount),split="x"),"[",1)),
                          y=as.numeric(sapply(strsplit(colnames(rawcount),split="x"),"[",2)))
@@ -52,25 +54,52 @@ rownames(info) <- colnames(rawcount)
 Coords=info[,1:2]
 ```
 
-# Excluding low expressed genes
+View the coordinates of x and y on 2-D space
+
 ```
-Filtered_ExpMat <- SpFilter(rawcount)
-Filtered_ExpMat <- Matrix::Matrix(Filtered_ExpMat, sparse = TRUE)
+head(Coords)
+                  x     y
+17.907x4.967 17.907 4.967
+18.965x5.003 18.965 5.003
+18.954x5.995 18.954 5.995
+17.846x5.993 17.846 5.993
+20.016x6.019 20.016 6.019
+20.889x6.956 20.889 6.956
 ```
-Check the dimension of the input data, 
+
+View the dimension of coordinates
+
 ```
 dim(Coords)
+[1] 251   2
+```
+
+# Preprocessing
+Excluding low expressed genes
+```
+Filtered_ExpMat <- SpFilter(rawcount)
+```
+
+(Optional) For this data, we need to explicitly convert the data format to Matrix
+```
+Filtered_ExpMat <- Matrix::Matrix(Filtered_ExpMat, sparse = TRUE)
+```
+
+Check the dimension of the input data 
+```
 dim(Filtered_ExpMat)
+[1] 11769   251
 ```
 
 # Computing p-values
+The inputs are the coordinates and the expresson matrix, scBSP calculates the p-values
+```
 P_values <- scBSP(Coords, Filtered_ExpMat)
-Test the spatially expressed pattern genes.
+```
 
-# Output the final results, i.e., combined p-values, adjusted p-values, etc.
-
+# Output the final results
+```
 head(P_values)
-
   GeneNames     P_values
 1     GAPDH 2.704573e-09
 2      USP4 2.452562e-01
@@ -78,6 +107,24 @@ head(P_values)
 4     CPEB1 7.656481e-01
 5    LANCL2 7.272278e-01
 6      MCL1 9.308317e-06
+```
+
+Final results are sorted and filtered if P_values<0.05 
+```
+results <- P_values[P_values$P_values<0.05,]
+results <- results[order(results$P_values),]
+head(results)
+     GeneNames     P_values
+326     SPINT2 0.000000e+00
+261      POSTN 6.439294e-15
+2013    COL1A1 6.550316e-15
+1347       B2M 7.660539e-15
+2370       FN1 1.521006e-14
+1072    EEF1A1 1.356693e-13
+
+dim(results)
+[1] 1765    2
+```
 
 # Example 2:
 
@@ -90,66 +137,3 @@ Wang, J., Li, J., Kramer, S.T. et al. Dimension-agnostic and granularity-based s
 3. Stahl, P. L. et al. Visualization and analysis of gene expression in tissue sections by spatial transcriptomics. Science 353, 78-82, 2016
 4. https://github.com/mssanjavickovic/3dst
 
-
-### System Requirements
-* Python 3.7+
-* scikit-learn
-* numpy
-* pandas
-
-### Installation
-Tested on Windows 10, Ubuntu 16.04, CentOS 7, MacOS Monterey version 12.4, and MacOS M1 Pro Ventura 13.2.1.
-
-### Quick Start
-
-Place your spatial transcriptomic data as a folder under data/ folder. MOB (2D ST mouse olfactory from Stahl et al.) and 3Dsim are provided as the tutorial usage.
-
-## Example 1: 2D spatial transcriptomics of ST mouse olfactor
-```
-python BSP.py --datasetName MOB --spaLocFilename Rep11_MOB_spa.csv --expFilename Rep11_MOB_count.csv
-```
-
-This step will load location and expression files individually under data/MOB/ folder, and generate MOB_P_values.csv in the project folder, where each row corresponds to each gene, each gene name with the inferred pvalue.
-
-If use beta distribution:
-```
-python BSP.py --datasetName MOB --spaLocFilename Rep11_MOB_spa.csv --expFilename Rep11_MOB_count.csv --fitDist beta --adjustP
-```
-
-User can also output top-quantile genes regardless the p-values using argument ```--empirical```, and manually define quantiles by ```--quantiles```. 
-```
-python BSP.py --datasetName MOB --spaLocFilename Rep11_MOB_spa.csv --expFilename Rep11_MOB_count.csv --empirical --quantiles 0.05
-```
-
-## Example 2: 3D spatial transcriptomics from simulation
-```
-python BSP.py --inputDir data/3Dsim/  --for3DTag --useDirTag 
-```
-This step will load all location and expression combined files under data/3Dsim/ folder, and generate Pattern_1_P_values.csv in the project folder, where each row corresponds to each gene, each gene name with the inferred pvalue.
-
-Both 2D and 3D examples should be finished in several seconds. On a MacOS M1 Pro Ventura 13.2.1, example 1 takes ~1 seconds, example 2 takes less than 1 seconds.
-
-### Support data formats
-1. Use Coordinates file and Expression file with single study (as example 1)
-* Coordinates file: Row as spots, Column as x,y (for 2D), x,y,z (for 3D)
-* Expression file: Row as spots, Column as genes
-
-2. Input with single .csv file (as example 2)
-* Rows as spots, Columns as 3D Coordinates ("x","y","z") or 2D Coordinates ("x","y")+ Genes
-
-## Usage
-
-```
-# Creating coords and expression matrix
-Coords <- expand.grid(1:100,1:100, 1:3)
-RandFunc <- function(n) floor(10 * stats::rbeta(n, 1, 5))
-Raw_Exp <- Matrix::rsparsematrix(nrow = 10^4, ncol = 3*10^4, density = 0.0001, rand.x = RandFunc)
-
-# Excluding low expressed genes
-Filtered_ExpMat <- SpFilter(Raw_Exp)
-rownames(Filtered_ExpMat) <- paste0("Gene_", 1:nrow(Filtered_ExpMat))
-
-# Computing p-values
-P_values <- scBSP(Coords, Filtered_ExpMat)
-
-```
