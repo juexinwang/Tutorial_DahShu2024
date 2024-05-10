@@ -13,7 +13,8 @@ Original implementation of BSP in python is available at https://github.com/juex
 
 
 This package utilizes a granularity-based dimension-agnostic tool, single-cell big-small patch (scBSP), implementing **sparse matrix** operation and KD-tree/balltree method for distance calculation, for the identification of spatially variable genes on
-large-scale data. A corresponding Python library is available at [https://pypi.org/project/scbsp](https://pypi.org/project/scbsp/).
+large-scale data. A corresponding Python library is available at [https://pypi.org/project/scbsp](https://pypi.org/project/scbsp/). The R source code is available at https://github.com/CastleLi/scBSP
+. The Python source code is available at https://github.com/YQ-Wang/scBSP
 
 
 # System Requirement
@@ -58,6 +59,7 @@ View the coordinates of x and y on 2-D space
 
 ```
 head(Coords)
+
                   x     y
 17.907x4.967 17.907 4.967
 18.965x5.003 18.965 5.003
@@ -127,17 +129,131 @@ dim(results)
 ```
 
 
-
-
 # Example 2: HDST data of mouse hippocampus
+HDST provides a subcellular resolution spatial trianscriptomics data, which contains 181,367 spots and 13,243 genes with density XXX. The data can be downloaded at [here](https://github.com/juexinwang/Tutorial_DahShu2024/blob/master/data/CN24_D1_unmodgtf_filtered_red_ut_HDST_final_clean.rds)
 
-HDST provides a subcellular resolution spatial trianscriptomics data, which contains XX spots and XX genes with density XXX. The data can be downloaded at [here](https://github.com/juexinwang/Tutorial_DahShu2024/blob/master/data/CN24_D1_unmodgtf_filtered_red_ut_HDST_final_clean.rds)
+    library('scBSP')
+    load("./CN24_D1_unmodgtf_filtered_red_ut_HDST_final_clean.rds")
 
+View the expression count matrix as a sparse matrix, each row denotes a gene and each column represents a cell/spot.
 
+```
+sp_count[1:5,1:5]
 
+5 x 5 sparse Matrix of class "dgCMatrix"
+        1000x100 1000x103 1000x113 1000x114 1000x116
+Rcn2           .        .        .        .        .
+Mycbp2         .        .        .        .        .
+mt-Rnr2        .        .        .        .        .
+Mprip          .        .        .        .        .
+Mroh1          .        .        .        .        .
+```
 
-# Example 2: SlideSeq V2 data on Mouse Olfactory Bulb
+## Prepare the input: coordinates and gene expression
 
+Extract the coordinates
+```
+info <- cbind.data.frame(x=as.numeric(sapply(strsplit(colnames(sp_count),split="x"),"[",1)),
+                         y=as.numeric(sapply(strsplit(colnames(sp_count),split="x"),"[",2)))
+rownames(info)  <- colnames(sp_count)
+Coords        <- as.matrix(info)
+```
+
+View the coordinates of x and y on 2-D space
+
+```
+head(Coords)
+            x   y
+1000x100 1000 100
+1000x103 1000 103
+1000x113 1000 113
+1000x114 1000 114
+1000x116 1000 116
+1000x142 1000 142
+```
+
+View the dimension of coordinates
+
+```
+dim(Coords)
+[1] 181367      2
+```
+
+## Preprocessing
+Removing mitochondrial genes
+```
+mt_idx      <- grep("mt-",rownames(sp_count))
+if(length(mt_idx)!=0){
+    sp_count    <- sp_count[-mt_idx,]
+}
+```
+
+Excluding low expressed genes
+```
+Filtered_ExpMat <- SpFilter(sp_count)
+```
+
+Check the dimension of the input data 
+```
+dim(Filtered_ExpMat)
+[1]  13209 181367
+```
+
+## Computing p-values
+Calculate Spatially Variable Genes with this sparse matrix using scBSP.
+```
+P_values <- scBSP(Coords, Filtered_ExpMat)
+```
+
+## Recording computation time
+Install peakRAM package to record computational resources
+```
+install.packages("peakRAM")
+```
+or
+
+```
+install.packages("remotes")
+remotes::install_github("tpq/peakRAM")
+```
+
+Record computational resources, it takes seconds on a laptop.
+```
+library(peakRAM)
+peakRAM(P_values <- scBSP(Coords, Filtered_ExpMat))
+
+Normalizing the expression matrix
+Normalizing the coords matrix
+Calculating p-values
+                            Function_Call Elapsed_Time_sec Total_RAM_Used_MiB Peak_RAM_Used_MiB
+1 P_values<-scBSP(Coords,Filtered_ExpMat)            2.877                0.1         505559907
+```
+
+## Output the final results
+
+Final results are sorted and filtered if P_values<0.05 
+```
+results <- P_values[P_values$P_values<0.05,]
+results <- results[order(results$P_values),]
+head(results)
+    GeneNames     P_values
+24    Gm42418 0.000000e+00
+70      Cmss1 0.000000e+00
+74     Camk1d 3.330669e-16
+49       Gphn 7.771561e-16
+64 CT010467.1 1.975087e-13
+43       Cdk8 1.445843e-12
+
+dim(results)
+[1] 1829    2
+```
+
+# Example 3: SlideSeq V2 data on Mouse Olfactory Bulb
+
+Use SlideSeq V2 data with higher density.
+
+## Install data using SeuratData
+```
 install.packages("remotes")
 remotes::install_github("satijalab/seurat-data")
 
@@ -145,18 +261,45 @@ library(Seurat)
 library(SeuratData)
 library(SeuratObject)
 library(peakRAM)
+```
 
+Check the available data
+```
 AvailableData()
+```
 
+Install Slide-seq v2 dataset of mouse hippocampus
+```
 InstallData("ssHippo")
+```
+
+## load data and preprocessing
+```
 slide.seq <- LoadData("ssHippo")
 data_extracted <- scBSP::LoadSpatial(slide.seq)
 ExpMatrix_Filtered <- scBSP::SpFilter(data_extracted$ExpMatrix, Threshold = 1)
-P_values <- scBSP::scBSP(data_extracted$Coords, ExpMatrix_Filtered)
+```
 
-scBSP_mem <- peakRAM({
-  P_values <- scBSP::scBSP(data_extracted$Coords, ExpMatrix_Filtered)
-})
+Check the dimensions
+```
+dim(data_extracted$Coords)
+[1] 53173     2
+
+dim(ExpMatrix_Filtered)
+[1] 23243 53173
+```
+
+Record the computation time
+```
+peakRAM({ P_values <- scBSP::scBSP(data_extracted$Coords,ExpMatrix_Filtered)})
+
+Normalizing the expression matrix
+Normalizing the coords matrix
+Calculating p-values
+                                                       Function_Call Elapsed_Time_sec Total_RAM_Used_MiB Peak_RAM_Used_MiB
+1 {P_values<-scBSP::scBSP(data_extracted$Coords,ExpMatrix_Filtered)}           15.572                  0         456867078
+```
+We can see it takes more time than HDST data for they have different density.
 
 # Cite
 Wang, J., Li, J., Kramer, S.T. et al. Dimension-agnostic and granularity-based spatially variable gene identification using BSP. Nat Commun 14, 7367 (2023). https://doi.org/10.1038/s41467-023-43256-5
