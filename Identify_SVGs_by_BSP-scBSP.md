@@ -458,7 +458,7 @@ saveGenePlotLog <- function(counts_matrix, Coords, geneName) {
   ggsave(paste("plots/", geneName, ".png", sep = ""), plot = p, width = 8, height = 6, dpi = 300)
 }
 ```
-Once the function is defines, pass in the sample expression matrix, coordinates, and the name of the gene you want to create a plot for. In the example below, we use the expression matrix and coordinates from Example 1, and plot the SVG which was found to have the lowest P_value.
+Once the function is defined, pass in the sample expression matrix, coordinates, and the name of the gene you want to create a plot for. In the example below, we use the expression matrix and coordinates from Example 1, and plot the SVG which was found to have the lowest P_value.
 ```
 saveGenePlotLog(Filtered_ExpMat, Coords, "SPINT2")
 ```
