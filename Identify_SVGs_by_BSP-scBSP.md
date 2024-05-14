@@ -432,8 +432,9 @@ Using the 3D coordatinates and expression matrix, scBSP calculates the p-values
 6     SVG_6 0.91673636
 ```
 
-# Extra: Plotting Gene Expression in 2D Spatial Domain
+# Extra: Plotting Gene Expression in 2D Spatial Domain in Example 1
 Additionally, to check the gene expression across the sample spots/cells, you can plot the gene expression with the spatial coordinates to visualize the distribution. Create a subdirectory in your working directory names 'plots' to save the figures.
+(Note: Example 2 & 3's data is very large and may take up alot of computational resources to plot all the cells/spots. Please only use the below code for Example 1)
 
 ```
 install.packages("ggplot2")
@@ -462,7 +463,9 @@ Once the function is defined, pass in the sample expression matrix, coordinates,
 ```
 saveGenePlotLog(Filtered_ExpMat, Coords, "SPINT2")
 ```
-
+| SPINT2  | 
+| ------------- |
+| ![SPINT2](plots/SPINT2.png)  | 
 
 # Cite
 1. Wang, J., Li, J., Kramer, S.T. et al. Dimension-agnostic and granularity-based spatially variable gene identification using BSP. Nat Commun 14, 7367 (2023). https://doi.org/10.1038/s41467-023-43256-5
