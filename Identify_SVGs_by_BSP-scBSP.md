@@ -153,15 +153,27 @@ HDST provides a subcellular resolution spatial trianscriptomics data, which cont
 View the expression count matrix which is already loaded in as a sparse matrix, each row denotes a gene and each column represents a cell/spot.
 
 ```
-> sp_count[1:5,1:5]
+> head(sp_count)
+Loading required package: Matrix
+6 x 181367 sparse Matrix of class "dgCMatrix"
+  [[ suppressing 34 column names ‘1000x100’, ‘1000x103’, ‘1000x113’ ... ]]
+                                                                           
+Rcn2    . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+Mycbp2  . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+mt-Rnr2 . . . . . . . . . . 1 . 1 2 . . 1 . 1 1 . . 2 2 2 6 4 . 6 2 . 1 1 4
+Mprip   . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+Mroh1   . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+Zfp560  . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+              
+Rcn2    ......
+Mycbp2  ......
+mt-Rnr2 ......
+Mprip   ......
+Mroh1   ......
+Zfp560  ......
 
-5 x 5 sparse Matrix of class "dgCMatrix"
-        1000x100 1000x103 1000x113 1000x114 1000x116
-Rcn2           .        .        .        .        .
-Mycbp2         .        .        .        .        .
-mt-Rnr2        .        .        .        .        .
-Mprip          .        .        .        .        .
-Mroh1          .        .        .        .        .
+ .....suppressing 181333 columns in show(); maybe adjust options(max.print=, width=)
+ ..............................
 ```
 
 ## Prepare the Input: Coordinates and Gene Expression
