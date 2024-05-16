@@ -90,19 +90,19 @@ Exclude low expressed genes from the expression matrix
 
 For the gene expression data, we need to explicitly convert the data format to a sparse Matrix
 ```
-> Filtered_ExpMat <- Matrix::Matrix(Filtered_ExpMat, sparse = TRUE)
+> Filtered_ExpMat_sparse <- Matrix::Matrix(Filtered_ExpMat, sparse = TRUE)
 ```
 
 Check the dimensions of the filtered input data (Should be N x M, sparse matrix with N genes and M spots)
 ```
-> dim(Filtered_ExpMat)
+> dim(Filtered_ExpMat_sparse)
 [1] 11769   251
 ```
 
 ## Computing P-values
 The inputs are the coordinates and the expresson matrix, scBSP calculates the p-values
 ```
-> P_values <- scBSP(Coords, Filtered_ExpMat)
+> P_values <- scBSP(Coords, Filtered_ExpMat_sparse)
 ```
 
 ## Output the Final Results
